@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details</title>
+<link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+
+<section class="product-details">
+  <div class="product-wrapper">
+
+    <!-- Product Image -->
+    <div class="product-image">
+      <img id="main-image" src="assets/bed-arrangement-with-fresh-sheets.jpg" alt="Premium Pillow">
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-info">
+      <h2 id="product-title">Premium Memory Foam Pillow</h2>
+      <p class="price" id="product-price">৳ 3,200</p>
+      <p class="description">
+        Ergonomic memory foam pillow designed for proper neck alignment and deep sleep.
+      </p>
+
+      <!-- Color Selection -->
+      <div class="selection">
+        <span>Select Color:</span>
+        <div class="color-options">
+          <button class="color white" data-image="as" title="White"></button>
+          <button class="color grey" data-image="images/pillow-grey.jpg" title="Grey"></button>
+          <button class="color blue" data-image="images/pillow-blue.jpg" title="Blue"></button>
+        </div>
+      </div>
+
+      <!-- Size Selection -->
+      <div class="selection">
+        <span>Select Size:</span>
+        <select id="size-selector">
+          <option value="single">Single</option>
+          <option value="queen">Queen</option>
+          <option value="king">King</option>
+        </select>
+      </div>
+
+      <!-- Quantity -->
+      <div class="selection">
+        <span>Quantity:</span>
+        <input type="number" id="quantity" value="1" min="1">
+      </div>
+
+      <!-- Features -->
+      <ul class="features">
+        <li>✔ Orthopedic support</li>
+        <li>✔ Breathable fabric</li>
+        <li>✔ Skin-friendly materials</li>
+        <li>✔ Long-lasting comfort</li>
+      </ul>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn-buy" id="buy-now">Buy Now</button>
+        <button class="btn-cart" id="add-cart">Add to Cart</button>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
