@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function () {
+      emailjs.init("H-gaTez9CyDCYcTwI"); // Replace with your EmailJS public key
+    })();
+  </script>
+</head>
+
+<body class="bg-gray-300 p-6 font-sans">
+  <div class="w-full flex justify-center my-6">
+    <a href="index.html" class="text-2xl font-bold text-black">
+     <div class="flex items-center border border-2 p-4 rounded-lg shadow-lg bg-white">
+       <img  src="assets/logo (1).png" alt="Royal Rest BD" class="h-20 shadow-lg rounded-full ">
+      <h3 class="text-4xl text-yellow-500">Royal Rest BD</h3>
+     </div>
+    </a>
+  </div>
+
+  <div class="max-w-4xl mx-auto bg-white shadow-lg p-6 rounded-lg">
+    <h1 class="text-3xl font-bold mb-10 text-center">Checkout</h1>
+
+    <!-- Cart Items Preview -->
+    <div id="cartItems" class="mb-8 space-y-4"></div>
+
+    <div class="mb-6 text-right font-bold text-xl">
+      Total: ৳<span id="cartTotal">0</span>
+    </div>
+
+    <!-- Checkout Form -->
+    <form id="checkoutForm" class="space-y-4">
+      <input type="text" name="customer_name" placeholder="Your Name" required
+        class="w-full p-3 rounded border border-gray-300">
+      <input type="email" name="customer_email" placeholder="Email" required
+        class="w-full p-3 rounded border border-gray-300">
+      <input type="tel" name="customer_phone" placeholder="Phone" required
+        class="w-full p-3 rounded border border-gray-300">
+      <textarea name="customer_address" placeholder="Address" required
+        class="w-full p-3 rounded border border-gray-300"></textarea>
+
+      <!-- Hidden Input for Cart Table HTML -->
+      <input type="hidden" name="cart_data" id="cart_data">
+
+      <button type="submit" class="w-full py-3 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700">
+        Place Order
+      </button>
+    </form>
+  </div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartItemsContainer = document.getElementById('cartItems');
+    const cartTotalSpan = document.getElementById('cartTotal');
+    const cartDataInput = document.getElementById('cart_data');
+
+    // Render cart items
+    function renderCart() {
+      let total = 0;
+      cartItemsContainer.innerHTML = '';
+
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p class="text-center text-gray-500">Your cart is empty.</p>';
+      } else {
+        cart.forEach((item, index) => {
+          const itemTotal = item.price * item.qty;
+          total += itemTotal;
+
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-4 bg-gray-100 p-3 rounded-lg';
+          div.innerHTML = `
+          <img src="${item.image}" class="w-20 h-20 object-cover rounded" alt="${item.name}">
+          <div class="flex-1">
+            <h3 class="font-semibold">${item.name}</h3>
+            <p>৳${item.price} x ${item.qty} = ৳${itemTotal}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <button onclick="decreaseQty(${index})" type="button" class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400">-</button>
+              <span class="font-bold">${item.qty}</span>
+              <button onclick="increaseQty(${index})" type="button" class="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400">+</button>
+            </div>
+          </div>
+          <button onclick="removeFromCart(${index})" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded">Delete</button>
+        `;
+          cartItemsContainer.appendChild(div);
+        });
+      }
+
+      cartTotalSpan.textContent = total;
+
+      // Update hidden cart table for EmailJS
+      let cartTableHTML = `
+      <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Product Name</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Image</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:right;">Price</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:center;">Quantity</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.qty;
+        cartTableHTML += `
+        <tr>
+          <td style="border:1px solid #ddd; padding:8px;">${item.name}</td>
+          <td style="border:1px solid #ddd; padding:8px;">
+            <img src="${item.image}" alt="${item.name}" width="80">
+          </td>
+          <td style="border:1px solid #ddd; padding:8px; text-align:right;">৳${item.price}</td>
+          <td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.qty}</td>
+          <td style="border:1px solid #ddd; padding:8px; text-align:right;">৳${itemTotal}</td>
+        </tr>
+      `;
+      });
+
+      cartTableHTML += `
+      <tr>
+        <td colspan="4" style="border:1px solid #ddd; padding:8px; font-weight:bold; text-align:right;">Grand Total</td>
+        <td style="border:1px solid #ddd; padding:8px; font-weight:bold; text-align:right;">৳${total}</td>
+      </tr>
+      </tbody>
+      </table>
+    `;
+
+      cartDataInput.value = cartTableHTML;
+      localStorage.setItem('cart', JSON.stringify(cart)); // Update storage
+    }
+
+    // Remove item
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    // Increase quantity
+    function increaseQty(index) {
+      cart[index].qty += 1;
+      renderCart();
+    }
+
+    // Decrease quantity
+    function decreaseQty(index) {
+      if (cart[index].qty > 1) {
+        cart[index].qty -= 1;
+      } else {
+        // If qty is 1, remove the item
+        cart.splice(index, 1);
+      }
+      renderCart();
+    }
+
+    // Initial render
+    renderCart();
+
+    // Form submission
+    document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+
+      emailjs.sendForm('service_e2hzmmi', 'template_s5fjdnu', this)
+        .then(() => {
+          alert('Order sent successfully! Check your email.');
+          localStorage.removeItem('cart'); // Clear cart after order
+          window.location.href = 'index.html';
+        }, (err) => {
+          alert('Failed to send order: ' + JSON.stringify(err));
+        });
+    });
+  </script>
+
+</body>
+
+</html>
